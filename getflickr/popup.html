@@ -1,0 +1,58 @@
+<style type="text/css">
+body {min-width: 375px;overflow-x: hidden;}
+img {margin: 5px;width: 75px;height: 75px;vertical-align: middle;border: 1px solid black;}
+</style>
+<script type="text/javascript">
+var username = getItem('user') || 'statescua', num = 20; 
+var req = new XMLHttpRequest();
+var url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20flickr.photos.search%28"+num+"%29%20where%20user_id%20in%20%28select%20value%20from%20html%20where%20url%20%3D%20%22http%3A%2F%2Fwww.flickr.com%2Fphotos%2F"+username+"%22%20and%20xpath%3D%22%2F%2Finput[%40name%3D\%27w\%27]%22%29&format=xml";
+    req.open("GET",url,true);
+    req.onreadystatechange = function() {
+         if(req.readyState == 4) {
+            if(req.status == 200) {
+               showPhotos();
+            }
+         }
+    }
+    req.send(null);
+function showPhotos() {
+    var photos = req.responseXML.getElementsByTagName("photo");
+        for(var i=0;photo = photos[i];i++) {
+            var a = document.createElement('a');
+                a.title = photo.getAttribute('title');
+                a.href = constructHrefA(photo);
+            var img = document.createElement('img');
+                img.src = constructImageURL(photo); 
+                a.appendChild(img);   
+                document.body.appendChild(a);
+        } 
+}
+function constructImageURL(photo) {
+    return "http://farm"+photo.getAttribute("farm")+".static.flickr.com/" + 
+            photo.getAttribute("server") + "/" + photo.getAttribute("id") + 
+            "_" + photo.getAttribute("secret") + "_s.jpg";
+} 
+function constructHrefA(photo) {
+    return "http://www.flickr.com/photos/" + photo.getAttribute("owner") + "/" + photo.getAttribute("id");  
+}
+function getItem(key) {
+   var value; 
+   log("Get Item:" + key);
+   try {
+    value = window.localStorage.getItem(key);
+   }catch(e) {
+      log("Error inside getItem() for key:" + key);
+      log(e);
+      value = "null"; 
+   }
+   log("Returning value: " + value);
+ return value; 
+}
+function log(str){if(window.console) console.log(str);}
+</script>
+<body>
+<h2><span id="user"></span>'s photostream</h2>
+<script type="text/javascript">
+document.getElementById('user').innerHTML = window.localStorage.getItem('user') || 'statescua';
+</script>
+</body>

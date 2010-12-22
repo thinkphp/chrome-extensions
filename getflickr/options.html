@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+   <title>My Flickr Options</title>
+   <style type="text/css">
+   </style>
+</head>
+<body>
+<p><label for="user">Username: </label><input type="text" id="user"><input type="button" id="save" value="save options"/></p>
+<p id="status"></p>
+</body>
+   <script type="text/javascript">
+   DOMhelp = {
+       addEvent: function(elem,evType,fn,useCapture) {
+               if(window.addEventListener) {
+                   return elem.addEventListener(evType,fn,useCapture); 
+               } else if(elem.attachEvent){
+                   var r = elem.attachEvent('on'+evType,fn);
+                 return r;
+               } else {
+                   elem['on'+evType] = fn;
+               }
+       }  
+   }
+   var save = document.getElementById('save'), 
+       user = document.getElementById('user');
+       DOMhelp.addEvent(save,'click',function(e){
+               if(save_options()){
+                    user.value = "";
+               }               
+       },false);
+       function save_options() {
+                localStorage['user'] = user.value; 
+                document.getElementById('status').innerHTML = "Set Up Flickr Photos for <strong>" + user.value + "</strong> - <font color='green'>saved</font>";
+         return true;
+       }
+   </script>
+</html>
+

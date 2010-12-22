@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Geo This popup</title>
+<style type="text/css">
+*{font-size:100%;margin:0;padding:0;}   
+html,body{background:#fff;color:#333;font-family:calibri,arial,sans-serif;width:480px;}
+h1{padding:0 10px 0 34px;background:url(icon-32.png) center left no-repeat #69c;-webkit-box-shadow: 5px 5px 7px rgba(33,33,33,.7);color:#fff;font-size:120%;font-weight:bold;line-height:32px;-webkit-border-radius:5px;}
+#doc{width:400px;padding:2em;}
+ul li {cursor:pointer;}
+ul{margin:1em 0;}
+#geocontainer p{margin:2em 0;font-weight:bold;}
+ul li{margin:0 0 .5em 0;list-style:none;}
+ul li span, li span{font-weight:bold;color: #000}
+ul li ul {position: absolute; left: -9999px; width: 340px; font-size: 90%; margin-left: 1.2em;}
+ul li.open ul{position:relative;left:0;}
+.locations img{-webkit-border-radius:10px;display:block;margin:1em 0;}
+.error{color:#c00;}
+a{color:#369;}
+#ft{clear:both;font-size:80%;color:#999;text-align:right;}
+</style>
+</head>
+<body>
+<div id="doc">
+ <h1>Geographical locations:</h1>
+ <div id="geocontainer"><p>Loading&hellip;</p></div>
+ <p id="ft">@<a href="http://twitter.com/thinkphp">thinkphp</a> using YQL and Placemaker</a></p>
+</div>
+<script type="text/javascript">
+chrome.tabs.executeScript(null, {file: "content-script.js"});
+chrome.extension.onConnect.addListener(function(port){
+       if(port.name != 'getgeo') {
+          return;
+       }
+       port.onMessage.addListener(function(data){
+            if(data.command == 'geo') {
+                  if(data.selection !== '') {
+                    postgeo(data.selection, null);
+                  } else {
+                    postgeo('',data.loc); 
+                  }
+            }
+       });
+});
+
+var container = document.getElementById('geocontainer');
+
+function postgeo(selection, url) {
+     if(url) {
+        var YQL = 'select * from geo.placemaker where ' + 
+                  'documentURL ="' + url + 
+                  '" and documentType="text/html" and appid=""';
+     } else {
+        var YQL = 'select * from geo.placemaker where ' + 
+                  'documentContent ="' + selection + 
+                  '" and documentType="text/plain" and appid=""';
+     }
+     var url = 'http://query.yahooapis.com/v1/public/yql?q=' + 
+                encodeURIComponent(YQL)+'&format=json'; 
+  
+     var xhr = new XMLHttpRequest();
+         xhr.open("GET", url, true);
+         xhr.onreadystatechange = function() {
+             if(xhr.readyState == 4) {
+                     if(xhr.status == 200) {
+                        var resp = JSON.parse(xhr.responseText),
+                            badge = render(resp);  
+                            if(badge !== '') {
+                               container.innerHTML = badge;  
+                            } else {
+                               container.innerHTML = '<p class="error">Sorry, can\'t find any locations.</p>';
+                            }
+                     }
+             }
+         } 
+         xhr.send();
+}
+
+function render(data) {
+    var badge = '';
+    if(data.query.results && data.query.results.matches && data.query.results.matches.match) {
+       var results = data.query.results.matches.match,
+           markers = '',
+           locs = '<ul>'; 
+           if(!results.length) {
+              addto(results,0);  
+           } else {
+              for(var i=0,j=results.length;i<j;i++) {
+                 addto(results[i],i);
+              }
+           }
+           var url = 'http://maps.google.com/maps/api/staticmap'+ 
+                     '?sensor=false'+
+                     '&size='+400+'x'+200+'&maptype=roadmap' + markers;
+           locs += '</ul>';
+               
+           var map = '<img src="'+url+'" alt="Map">';
+
+           badge = '<div class="locations">' + map + locs + '</div>'; 
+    } 
+
+    function addto(results, i) {
+           var marker = String.fromCharCode((i+65)),
+               location = results.place.name,
+               type = results.place.type,
+               woeid = results.place.woeId,
+               lat = results.place.centroid.latitude,
+               lng = results.place.centroid.longitude;
+               markers += '&markers=color:blue|label:' + marker + '|'+ lat + ',' + lng;
+               locs += '<li>'+
+                       '<span>' + marker +': </span>' + 
+                       '<a href="http://maps.google.com/maps?q=' + location + '">' + 
+                        location + '</a>' + 
+                        '<ul>'+
+                         '<li><span>Type</span>: ' + type +'</li>' + 
+                         '<li><span>Latitude:</span> ' + lat+'</li>' + 
+                         '<li><span>Longitude:</span> ' + lng +'</li>' + 
+                         '<li><span>WOEID:</span> ' + woeid +'</li>' + 
+                        '</ul>'+
+                        '</li>';              
+    }
+
+  return badge;
+}
+
+container.addEventListener('click', function(e){
+     e.preventDefault();
+     var t = e.target;
+     if(t.nodeName.toLowerCase() == 'a') {
+        var p = t.parentNode;
+        p.className = p.className === 'open' ? '' : 'open';
+     }
+}, false);
+</script>
+</body>
+</html>
