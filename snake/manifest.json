@@ -1,0 +1,13 @@
+{
+"name": "Snake",
+"version": "1.0",
+"description": "JavaScript Snake Game", 
+ "browser_action": {
+ "default_icon": "icon.jpg",
+ "default_popup": "output.html"
+ },
+"permissions": ["tabs"],
+  "icons": {
+     "128": "icon.jpg"
+  }
+}
