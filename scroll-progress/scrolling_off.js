@@ -1,0 +1,1 @@
+document.removeEventListener('scroll', handleScroll);
