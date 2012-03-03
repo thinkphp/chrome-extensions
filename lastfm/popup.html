@@ -1,0 +1,132 @@
+<style type="text/css">
+body {min-width: 375px;overflow-x: hidden;}
+#badge{font-family: georgia,helvetica,arial;}
+#result span.loading{font-weight: bold;margin-botton: 100px}
+.error{color: #fff;background: #c00;padding: 4px;width: 150px}
+#badge ul{  padding-left: 0;width: 500px}
+#badge li{border-bottom: 1px dotted #35740a;padding: 4px;list-style:square}
+#badge a{  color: #000;  text-decoration: none;  font-size: 17px}
+#badge a:hover{text-decoration: none;}
+#badge li:hover{background: #aaf478}
+#user {color: #c09}
+</style>
+<script type="text/javascript">
+if(typeof GIB==="undefined"||!GIB){GIB={};}GIB.util={};GIB.util.Script=(function(){return{Script:function(url,callback){var s=document.createElement("script");s.setAttribute("type","text/javascript");s.setAttribute("src",url);s.setAttribute("id","leach");if(s.readyState){s.onreadystatechange=function(){if(s.readyState=="loaded"||s.readyState=="complete"){s.onreadystatechange=null;callback(s);var old=document.getElementById("leach");if(old){old.parentNode.removeChild(old);}}};}else{s.onload=function(){callback(s);var old=document.getElementById("leach");if(old){old.parentNode.removeChild(old);}};}document.getElementsByTagName("head")[0].appendChild(s);}};})();GIB.util.Request=function(method,url,async){};GIB.util.Dom=function(){};GIB.util.Event=(function(){return{addListener:function(elem,evType,fn,useCapture){if(elem.addEventListener){return elem.addEventListener(evType,fn,useCapture);}else{if(elem.attachEvent){return elem.attachEvent("on"+evType,fn);}else{elem["on"+evType]=fn;}}},cancelClick:function(event){if(window.event){window.event.returnValue=false;window.event.cancelBubble=true;}if(event&&event.preventDefault&&event.stopPropagation){event.stopPropagation();event.preventDefault();}},getTarget:function(event){var target=window.event?window.event.srcElement:event?event.target:null;while(target.nodeType!=1&&target.nodeName.toLowerCase()!=="body"){target=target.parentNode;}if(!target){return;}return target;},domReady:function(foo){var onreadystatechange="onreadystatechange",addEventListener="addEventListener",attachEvent="attachEvent",domContentLoaded="DOMContentLoaded",fn,f=false,fns=[],doc=document,i,loaded=/^loade|c/.test(doc.readyState);var flush=function(){loaded=1;while(i=fns.shift()){i();}};doc[addEventListener]&&doc[addEventListener](domContentLoaded,fn=function(){window.removeEventListener(domContentLoaded,fn,f);flush();},f);doc[attachEvent]&&doc[attachEvent](onreadystatechange,fn=function(){if(/^com/.test(doc.readyState)){window.detachEvent(domContentLoaded,fn);flush();}});(function(){loaded?foo():fns.push(foo);})();},ID:function(id){return document.getElementById(id);}};})();
+!function(win){var template = function(tmp,o){ return tmp.replace((RegExp("{([^{}]*)}","gi")), function(tag,p){return o[p];});};win['template'] = template;}(this);
+
+var lastfm = (function($event,$$){
+ 
+    //configuration
+    var input = 'username',
+        outputid = 'result',
+        badgeid = 'badge',
+
+    //amount of tracks
+    amount = 10, 
+
+    //timeout
+    timeoutdelay = 1000,
+
+    //store the link that was linked
+    o = null,
+
+    $ = function(id){return document.getElementById(id);},
+
+    //template output
+    tpl = "<li><a href='{link}'>{title}</a> <span>{pubDate}</span></li>";
+
+    function init() {
+          callData();
+    };
+
+    function callData() {
+
+         if(document.getElementById(outputid)) {
+
+             $(outputid).innerHTML = "<span class='loading'>Loading...</span>";
+     
+             var user = getItem("lastfmuser") || 'thinkphp',
+
+             url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20rss%20where%20url%3D%22http%3A%2F%2Fws.audioscrobbler.com%2F1.0%2Fuser%2F" + user + "%2Frecenttracks.rss%22&format=json&diagnostics=true&callback=lastfm.retrieveData";
+
+             $$.Script(url,function(){}); 
+         }
+    };
+
+    function retrieveData(dataset) {
+
+             window.clearInterval(lastfm.to);
+
+             if(dataset.query.results !== null) {
+                displayData(dataset);
+             } else {
+                handleError();
+             }
+    };
+
+    function displayData(dataset) {
+
+             $(outputid).innerHTML = "";
+         var out = $(outputid);
+             removeBadge();  
+         var items = dataset.query.results.item, 
+             n = items.length, 
+             output = '';
+
+         var ul = document.createElement('ul');
+             ul.id = badgeid;
+             for(var i=0;i<n;i++) {
+                 output += template(tpl,items[i]);  
+             }
+             ul.innerHTML = output;
+             out.appendChild(ul);
+             $(outputid).getElementsByTagName("a")[0].focus();
+    };
+
+    function removeBadge() {
+             if($(badgeid)) {
+                $(badgeid).parentNode.removeChild($(badgeid));
+             }
+    };  
+ 
+    function handleError() {
+             $('result').innerHTML = '<div class="error">User Not Found.</div>' 
+    };
+
+
+    function getItem(key) {
+
+      var value; 
+      console.log("Get Item:" + key);
+      try {
+        value = window.localStorage.getItem(key);
+      }catch(e) {
+        console.log("Error inside getItem() for key:" + key);
+        console.log(e);
+        value = "null"; 
+      }
+      console.log("Returning value: " + value);
+      return value;
+    }
+
+    return {init: init,retrieveData: retrieveData};
+})(GIB.util.Event,GIB.util.Script);
+
+GIB.util.Event.domReady(function(){
+    lastfm.init(); 
+});          
+</script>
+<body>
+
+<div id="doc" class="yui-t7">
+<h2><span id="user"></span>'s Recently Listened Tracks</h2>
+<script type="text/javascript">
+document.getElementById('user').innerHTML = window.localStorage.getItem('lastfmuser') || 'thinkphp';
+</script>
+
+   <div id="bd" role="main">
+	<div class="yui-g">
+         <div id="result"></div>
+	</div>
+	</div>
+</body>
