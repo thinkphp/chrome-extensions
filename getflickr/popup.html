@@ -3,9 +3,9 @@ body {min-width: 375px;overflow-x: hidden;}
 img {margin: 5px;width: 75px;height: 75px;vertical-align: middle;border: 1px solid black;}
 </style>
 <script type="text/javascript">
-var username = getItem('user') || 'statescua', num = 20; 
+var username = getItem('user') || '23455178@N06', num = 20; 
 var req = new XMLHttpRequest();
-var url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20flickr.photos.search%28"+num+"%29%20where%20user_id%20in%20%28select%20value%20from%20html%20where%20url%20%3D%20%22http%3A%2F%2Fwww.flickr.com%2Fphotos%2F"+username+"%22%20and%20xpath%3D%22%2F%2Finput[%40name%3D\%27w\%27]%22%29&format=xml";
+var url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20flickr.photos.search%20where%20api_key%3D'253442b0351463eb60b802d88d8f6f48'%20and%20user_id%3D'"+ username +"'&diagnostics=true";
     req.open("GET",url,true);
     req.onreadystatechange = function() {
          if(req.readyState == 4) {
@@ -53,6 +53,6 @@ function log(str){if(window.console) console.log(str);}
 <body>
 <h2><span id="user"></span>'s photostream</h2>
 <script type="text/javascript">
-document.getElementById('user').innerHTML = window.localStorage.getItem('user') || 'statescua';
+document.getElementById('user').innerHTML = window.localStorage.getItem('user') || '23455178@N06';
 </script>
 </body>
