@@ -5,4 +5,4 @@ Lastfm is an extension for Google Chrome that try to get latest tracks Last.fm f
 
 ![Screenshot](http://farm8.staticflickr.com/7045/6948505015_412d7eb092.jpg)
 
-You can install here: [https://github.com/thinkphp/chrome-extensions/tree/master/lastfm/](https://github.com/thinkphp/chrome-extensions/tree/master/lastfm/)
+You can install here: [http://thinkphp.ro/apps/chrome-extensions/lastfm/lastfm.crx](http://thinkphp.ro/apps/chrome-extensions/lastfm/lastfm.crx)
